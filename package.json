@@ -1,7 +1,7 @@
 {
   "name": "styledwind",
   "displayName": "Styledwind",
-  "description": "Support for .sw.ts",
+  "description": "Support for Styledwind files (.sw.ts) will enable correct formatting and highlighting of these files.",
   "publisher": "Punyarit",
   "version": "0.0.1",
   "engines": {
