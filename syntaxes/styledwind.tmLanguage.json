@@ -1,0 +1,59 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "styledwind",
+  "patterns": [
+    {
+      "match": "\\$\\w+(?:-\\w+){0,2}",
+      "name": "variable.template.styledwind"
+    },
+    {
+      "match": "\\[\\$\\w+(?:-\\w+)",
+      "name": "animate.name.styledwind"
+    },
+    {
+      "begin": "@",
+      "end": ":",
+      "name": "directive.styledwind"
+    },
+    {
+      "begin": "import",
+      "end": ">`",
+      "name": "import.export.styledwind"
+    },
+    {
+      "begin": "`",
+      "end": ";",
+      "name": "end-line.styledwind"
+    },
+    {
+      "match": "// Happy Styling;",
+      "name": "happy.styling.styledwind"
+    },
+    {
+      "match": "(\\.|#)[\\w+|\\d|\\S]+",
+      "name": "class.name.styledwind"
+    },
+    {
+      "match": "--[\\w\\d-]+",
+      "name": "css.variable.styledwind"
+    },
+    {
+      "match": "[\\w-]+(?=\\[)",
+      "name": "css.property.styledwind"
+    },
+    {
+      "match": "(?<=\\[\\$\\w+(?:-\\w+))\\s[\\w\\d\\s.]+|\\[[\\w\\d\\s-]+",
+      "name": "css.value.styledwind"
+    },
+    {
+      "match": "\\d+%",
+      "name": "keyframe.directive.styledwind"
+    },
+    {
+      "match": "(?<=@scope:\\s)[\\w-]+",
+      "name": "scope.name.styledwind"
+    }
+  ],
+
+  "scopeName": "source.sw.ts"
+}
