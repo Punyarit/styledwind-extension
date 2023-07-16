@@ -19,6 +19,13 @@
     "onCommand:extension.activate"
   ],
   "contributes": {
+    "keybindings": [
+      {
+        "command": "extension.jumpToNextBracket",
+        "key": "tab",
+        "when": "editorTextFocus && editorLangId == 'styledwind'"
+      }
+    ],
     "languages": [
       {
         "id": "styledwind",

@@ -165,7 +165,40 @@ export function activate(context: vscode.ExtensionContext) {
     },
   });
 
-  context.subscriptions.push(disposable, disposable2);
+  const tabInsideBracketEvent = vscode.commands.registerCommand(
+    'extension.jumpToNextBracket',
+    function () {
+      const editor = vscode.window.activeTextEditor;
+      if (editor) {
+        const document = editor.document;
+        const selection = editor.selection;
+
+        const textAfterCursor = document.getText(
+          new vscode.Range(selection.end, document.positionAt(document.getText().length))
+        );
+        const textBeforeCursor = document.getText(
+          new vscode.Range(document.positionAt(0), selection.start)
+        );
+
+        const nextClosingBracketIndex = textAfterCursor.indexOf(']');
+        const nextOpeningBracketIndex = textAfterCursor.indexOf('[');
+
+        // Checks if cursor is inside []
+        if (
+          nextClosingBracketIndex !== -1 &&
+          (nextOpeningBracketIndex === -1 || nextOpeningBracketIndex > nextClosingBracketIndex) &&
+          textBeforeCursor.lastIndexOf('[') > textBeforeCursor.lastIndexOf(']')
+        ) {
+          const targetPos = selection.end.translate(0, nextClosingBracketIndex + 1);
+          editor.selection = new vscode.Selection(targetPos, targetPos);
+        } else {
+          vscode.commands.executeCommand('tab');
+        }
+      }
+    }
+  );
+
+  context.subscriptions.push(disposable, disposable2, tabInsideBracketEvent);
 }
 
 export function deactivate() {}
