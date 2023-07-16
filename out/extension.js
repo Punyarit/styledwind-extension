@@ -101,19 +101,25 @@ function formatStyledWindDocument(document) {
         return line;
     })
         .join('\n');
-    /* ex: 50%,60% to 50%, 60% */
+    /* ex: 50%,60% => 50%, 60% */
     text = text.replace(/,/g, ', ');
-    /* ex:  bg[primary-200  ] to bg[primary-200]*/
+    /* ex:  bg[primary-200  ] => bg[primary-200]*/
     text = text.replace(/\s+]/g, ']');
-    /* ex:  bg[  primary-200] to bg[primary-200]*/
+    /* ex:  bg[  primary-200] => bg[primary-200]*/
     text = text.replace(/\[\s+/g, '[');
+    // ex: bg[red]    ; => bg[red];
     text = text.replace(/\s+;/g, ';');
     text = text.replace(/(?<=[^:;\s]+\s*$)/gm, ';');
     text = text.replace(/^\s*;\s*$|(?<=>\`);/gm, '');
     text = text.replace(/(?<=,\s*)\s+/g, ' ');
     text = text.replace(/(?<=\S) +(?=\S)/g, ' ');
+    // ex: .test    : bg[red] => ex: .test: bg[red]
     text = text.replace(/\s+:[\w\d\s+\[\]-]+;/g, function (match) {
         return match.replace(/\s+/g, ' ').trim();
+    });
+    // ex: .test:bg[red] => .test: bg[red]
+    text = text.replace(/:[\w\d]+[\[\]]|:--|:\$/g, function (match) {
+        return match.replace(/:/g, ': ').trim();
     });
     const fullRange = new vscode.Range(document.positionAt(0), document.positionAt(document.getText().length));
     edits.push(vscode.TextEdit.replace(fullRange, text));
