@@ -1,5 +1,17 @@
 import * as vscode from 'vscode';
 
+function formatAddNewLineToEachSection(inputString: string) {
+  // Add newline before each section starting with '@' at the start of a line
+  let formattedString = inputString.replace(/^\s*@/gm, '\n  @');
+
+  // Remove first newline character if it exists
+  if (formattedString.startsWith('\n')) {
+    return formattedString.slice(1);
+  }
+
+  return formattedString;
+}
+
 function convertToUsageText(input: string): string {
   if (input.startsWith('.')) {
     return toCamelCase(input.slice(1));
@@ -86,39 +98,68 @@ function formatStyledWindDocument(document: vscode.TextDocument): vscode.TextEdi
   // Normalize indentation and newlines
   let lines = text.split(/\r?\n/);
 
-  // Remove empty lines
-  lines = lines.filter((line) => line.trim() !== '');
+  let insideProperty = false;
 
-  text = lines
-    .map((line, index) => {
-      // Remove leading and trailing white space
-      line = line.trim();
+  // Initialize reformatted text with the first line
+  let reformattedText = lines[0].trimStart() + '\n';
 
-      // Normalize indentation based on leading keywords
-      if (line.startsWith('@')) {
-        line = '  ' + line;
+  for (let i = 1; i < lines.length; i++) {
+    // Ignore empty lines if the previous line was also empty or after @class:
+    if (
+      (lines[i].trim() === '' && lines[i - 1].trim() === '') ||
+      (lines[i].trim() === '' && lines[i - 1].trim().startsWith('@'))
+    ) {
+      continue;
+    }
 
-        // Add extra newline before each new section, but not for the first one
-        if (index > 0) {
-          line = '\n' + line;
-        }
-      } else if (line.startsWith('$') || line.startsWith('--') || line.startsWith('.')) {
-        line = '    ' + line;
-      } else if (line.match(/^\s*(\d+%)/)) {
-        line = '      ' + line;
-      }
+    lines[i] = lines[i].trimStart(); // Add this line to trim leading spaces
 
-      return line;
-    })
-    .join('\n');
+    // Normalize indentation based on leading keywords
+    if (lines[i].startsWith('@')) {
+      lines[i] = '  ' + lines[i];
+      insideProperty = false;
+    } else if (lines[i].startsWith('$') || lines[i].startsWith('--')) {
+      lines[i] = '    ' + lines[i];
+      insideProperty = true;
+    } else if (insideProperty && lines[i].match(/^\s*(\d+%)/)) {
+      lines[i] = '      ' + lines[i];
+    } else if (lines[i].startsWith('.')) {
+      lines[i] = '    ' + lines[i];
+      insideProperty = false;
+    }
 
-  /* ex: 50%,60% => 50%, 60% */
+    // Add the line to the reformatted text
+    reformattedText += lines[i];
+
+    // Add a newline character except for the last line
+    if (i !== lines.length - 1) {
+      reformattedText += '\n';
+    }
+
+    // Here, add an extra newline if the line starts with '@'
+    // and the next line does not also start with '@' to avoid successive empty lines
+    if (
+      lines[i].trimStart().startsWith('@') &&
+      i + 1 < lines.length &&
+      !lines[i + 1].trimStart().startsWith('@') &&
+      !lines[i + 1].trimStart().startsWith('.')
+    ) {
+      reformattedText += '\n';
+    }
+  }
+
+  // Remove unnecessary newlines
+  reformattedText = reformattedText.replace(/(@\w+:\n)\s*\n/g, '$1');
+
+  text = reformattedText;
+
+  // ex: 50%,60% => 50%, 60%
   text = text.replace(/,/g, ', ');
 
-  /* ex:  bg[primary-200  ] => bg[primary-200]*/
+  // ex:  bg[primary-200  ] => bg[primary-200]
   text = text.replace(/\s+]/g, ']');
 
-  /* ex:  bg[  primary-200] => bg[primary-200]*/
+  // ex:  bg[  primary-200] => bg[primary-200]
   text = text.replace(/\[\s+/g, '[');
   text = text.replace(/\[\s+/g, '[');
 
@@ -146,6 +187,10 @@ function formatStyledWindDocument(document: vscode.TextDocument): vscode.TextEdi
   text = text.replace(/](\w|--|\$)/g, function (match) {
     return match.replace(/]/g, '] ').trim();
   });
+
+  text = formatAddNewLineToEachSection(text);
+
+  text = text.replace(/:\n\n\s+(\d+%:)/g, ':\n      $1');
 
   const fullRange = new vscode.Range(
     document.positionAt(0),

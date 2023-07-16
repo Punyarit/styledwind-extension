@@ -2,6 +2,15 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deactivate = exports.activate = void 0;
 const vscode = require("vscode");
+function formatAddNewLineToEachSection(inputString) {
+    // Add newline before each section starting with '@' at the start of a line
+    let formattedString = inputString.replace(/^\s*@/gm, '\n  @');
+    // Remove first newline character if it exists
+    if (formattedString.startsWith('\n')) {
+        return formattedString.slice(1);
+    }
+    return formattedString;
+}
 function convertToUsageText(input) {
     if (input.startsWith('.')) {
         return toCamelCase(input.slice(1));
@@ -78,34 +87,55 @@ function formatStyledWindDocument(document) {
     text = text.replace(/(import { styled } from '@styledwind\/styled';)\s+(export default styled<.*?>)/, '$1 $2');
     // Normalize indentation and newlines
     let lines = text.split(/\r?\n/);
-    // Remove empty lines
-    lines = lines.filter((line) => line.trim() !== '');
-    text = lines
-        .map((line, index) => {
-        // Remove leading and trailing white space
-        line = line.trim();
+    let insideProperty = false;
+    // Initialize reformatted text with the first line
+    let reformattedText = lines[0].trimStart() + '\n';
+    for (let i = 1; i < lines.length; i++) {
+        // Ignore empty lines if the previous line was also empty or after @class:
+        if ((lines[i].trim() === '' && lines[i - 1].trim() === '') ||
+            (lines[i].trim() === '' && lines[i - 1].trim().startsWith('@'))) {
+            continue;
+        }
+        lines[i] = lines[i].trimStart(); // Add this line to trim leading spaces
         // Normalize indentation based on leading keywords
-        if (line.startsWith('@')) {
-            line = '  ' + line;
-            // Add extra newline before each new section, but not for the first one
-            if (index > 0) {
-                line = '\n' + line;
-            }
+        if (lines[i].startsWith('@')) {
+            lines[i] = '  ' + lines[i];
+            insideProperty = false;
         }
-        else if (line.startsWith('$') || line.startsWith('--') || line.startsWith('.')) {
-            line = '    ' + line;
+        else if (lines[i].startsWith('$') || lines[i].startsWith('--')) {
+            lines[i] = '    ' + lines[i];
+            insideProperty = true;
         }
-        else if (line.match(/^\s*(\d+%)/)) {
-            line = '      ' + line;
+        else if (insideProperty && lines[i].match(/^\s*(\d+%)/)) {
+            lines[i] = '      ' + lines[i];
         }
-        return line;
-    })
-        .join('\n');
-    /* ex: 50%,60% => 50%, 60% */
+        else if (lines[i].startsWith('.')) {
+            lines[i] = '    ' + lines[i];
+            insideProperty = false;
+        }
+        // Add the line to the reformatted text
+        reformattedText += lines[i];
+        // Add a newline character except for the last line
+        if (i !== lines.length - 1) {
+            reformattedText += '\n';
+        }
+        // Here, add an extra newline if the line starts with '@'
+        // and the next line does not also start with '@' to avoid successive empty lines
+        if (lines[i].trimStart().startsWith('@') &&
+            i + 1 < lines.length &&
+            !lines[i + 1].trimStart().startsWith('@') &&
+            !lines[i + 1].trimStart().startsWith('.')) {
+            reformattedText += '\n';
+        }
+    }
+    // Remove unnecessary newlines
+    reformattedText = reformattedText.replace(/(@\w+:\n)\s*\n/g, '$1');
+    text = reformattedText;
+    // ex: 50%,60% => 50%, 60%
     text = text.replace(/,/g, ', ');
-    /* ex:  bg[primary-200  ] => bg[primary-200]*/
+    // ex:  bg[primary-200  ] => bg[primary-200]
     text = text.replace(/\s+]/g, ']');
-    /* ex:  bg[  primary-200] => bg[primary-200]*/
+    // ex:  bg[  primary-200] => bg[primary-200]
     text = text.replace(/\[\s+/g, '[');
     text = text.replace(/\[\s+/g, '[');
     // ex: bg[red]    ; => bg[red];
@@ -126,6 +156,8 @@ function formatStyledWindDocument(document) {
     text = text.replace(/](\w|--|\$)/g, function (match) {
         return match.replace(/]/g, '] ').trim();
     });
+    text = formatAddNewLineToEachSection(text);
+    text = text.replace(/:\n\n\s+(\d+%:)/g, ':\n      $1');
     const fullRange = new vscode.Range(document.positionAt(0), document.positionAt(document.getText().length));
     edits.push(vscode.TextEdit.replace(fullRange, text));
     return edits;
