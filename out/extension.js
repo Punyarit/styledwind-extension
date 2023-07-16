@@ -107,6 +107,7 @@ function formatStyledWindDocument(document) {
     text = text.replace(/\s+]/g, ']');
     /* ex:  bg[  primary-200] => bg[primary-200]*/
     text = text.replace(/\[\s+/g, '[');
+    text = text.replace(/\[\s+/g, '[');
     // ex: bg[red]    ; => bg[red];
     text = text.replace(/\s+;/g, ';');
     text = text.replace(/(?<=[^:;\s]+\s*$)/gm, ';');
@@ -120,6 +121,10 @@ function formatStyledWindDocument(document) {
     // ex: .test:bg[red] => .test: bg[red]
     text = text.replace(/:[\w\d]+[\[\]]|:--|:\$/g, function (match) {
         return match.replace(/:/g, ': ').trim();
+    });
+    // ex: bg[red]tx[white] => bg[red] tx[white]
+    text = text.replace(/](\w|--|\$)/g, function (match) {
+        return match.replace(/]/g, '] ').trim();
     });
     const fullRange = new vscode.Range(document.positionAt(0), document.positionAt(document.getText().length));
     edits.push(vscode.TextEdit.replace(fullRange, text));
