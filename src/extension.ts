@@ -96,16 +96,16 @@ function formatStyledWindDocument(document: vscode.TextDocument): vscode.TextEdi
 
       // Normalize indentation based on leading keywords
       if (line.startsWith('@')) {
-        line = '\t' + line;
+        line = '  ' + line;
 
         // Add extra newline before each new section, but not for the first one
         if (index > 0) {
           line = '\n' + line;
         }
       } else if (line.startsWith('$') || line.startsWith('--') || line.startsWith('.')) {
-        line = '\t\t' + line;
+        line = '    ' + line;
       } else if (line.match(/^\s*(\d+%)/)) {
-        line = '\t\t\t' + line;
+        line = '      ' + line;
       }
 
       return line;
