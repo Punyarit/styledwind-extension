@@ -3,7 +3,7 @@
   "displayName": "Styledwind",
   "description": "Support for Styledwind files (.sw.ts) will enable correct formatting and highlighting of these files.",
   "publisher": "Punyarit",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "engines": {
     "vscode": "^1.79.0"
   },

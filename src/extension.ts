@@ -173,8 +173,8 @@ function formatStyledWindDocument(document: vscode.TextDocument): vscode.TextEdi
 
   text = text.replace(/(?<=\S) +(?=\S)/g, ' ');
 
-  // ex: .test    : bg[red] => ex: .test: bg[red]
-  text = text.replace(/\s+:[\w\d\s+\[\]-]+;/g, function (match) {
+  // ex: .test    : bg[red] => .test: bg[red]
+  text = text.replace(/\s+:[\w\%\$\d\s+\[\]\(\).,-]+;/g, function (match) {
     return match.replace(/\s+/g, ' ').trim();
   });
 
