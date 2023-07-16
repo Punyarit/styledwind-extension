@@ -42,7 +42,7 @@
       "name": "css.property.styledwind"
     },
     {
-      "match": "(?<=\\[\\$\\w+(?:-\\w+))\\s[\\w\\d\\s.]+|\\[[\\w\\d\\s-]+",
+      "match": "(?<=(\\[)|(\\[\\$[\\w-]+)\\s)[\\(\\,\\)\\w\\d\\s.-]+",
       "name": "css.value.styledwind"
     },
     {
