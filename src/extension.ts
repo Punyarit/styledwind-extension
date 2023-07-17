@@ -45,7 +45,7 @@ function formatStyledWindDocument(document: vscode.TextDocument): vscode.TextEdi
 	`;
   }
 
-  const regex = /(?<=@join[^@]*?)\$[a-zA-Z0-9_-]+|\.[\w-]+|--[\w-]+/g;
+  const regex = /(?<=@join[^@]*?)\$[a-zA-Z][\w]+|\.[\a-zA-Z]+[\w-_]+|--[a-zA-Z][\w-]+/g;
   const matches = Array.from(text.matchAll(regex)).map((match) => match[0]);
 
   // Remove duplicates
@@ -179,7 +179,7 @@ function formatStyledWindDocument(document: vscode.TextDocument): vscode.TextEdi
   });
 
   // ex: .test:bg[red] => .test: bg[red]
-  text = text.replace(/:[\w\d]+[\[\]]|:--|:\$/g, function (match) {
+  text = text.replace(/:[\w\d]+[\[\]]|:--|:\$|:\./g, function (match) {
     return match.replace(/:/g, ': ').trim();
   });
 
