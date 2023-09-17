@@ -131,6 +131,15 @@ function formatStyledWindDocument(document) {
     // Remove unnecessary newlines
     reformattedText = reformattedText.replace(/(@\w+:\n)\s*\n/g, '$1');
     text = reformattedText;
+    text = text.replace(/(?<=calc\()[\w\+\-\*\/%\s]+/g, function (match) {
+        // Split and join
+        let result = match.split(/([+\-*/])/).join(' ');
+        // Trim extra spaces around "--something"
+        result = result.replace(/\s+(--\w+)\s*/g, ' $1 ');
+        // Trim leading/trailing spaces
+        result = result.trim();
+        return result;
+    });
     // ex: 50%,60% => 50%, 60%
     text = text.replace(/,/g, ', ');
     // ex:  bg[primary-200  ] => bg[primary-200]

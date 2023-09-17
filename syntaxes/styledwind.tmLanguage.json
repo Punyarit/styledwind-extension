@@ -3,6 +3,14 @@
   "name": "styledwind",
   "patterns": [
     {
+      "match": "[\\w-]+(?=\\[)",
+      "name": "css.property.styledwind"
+    },
+    {
+      "match": "calc\\(",
+      "name": "css.function.styledwind"
+    },
+    {
       "match": "\\$\\w+(?:-\\w+){0,2}",
       "name": "variable.template.styledwind"
     },
@@ -38,11 +46,7 @@
       "name": "css.variable.styledwind"
     },
     {
-      "match": "[\\w-]+(?=\\[)",
-      "name": "css.property.styledwind"
-    },
-    {
-      "match": "(?<=(\\[)|(\\[\\$[\\w-]+)\\s)[\\(\\,\\)\\w\\%\\d\\s,.-]+",
+      "match": "(?<=(\\[)|(\\[\\$[\\w-]+)\\s)[\\(\\,\\)\\w\\%\\d\\s\\+\\*/,.-]+",
       "name": "css.value.styledwind"
     },
     {
@@ -52,6 +56,10 @@
     {
       "match": "(?<=@scope:\\s)[\\w-]+",
       "name": "scope.name.styledwind"
+    },
+    {
+      "match": "\\S",
+      "name": "unmatched.styledwind"
     }
   ],
 
